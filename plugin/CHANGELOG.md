@@ -6,7 +6,7 @@ this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-### Changed
+### Added
 - **The HTML dashboard no longer shows `/scout-plan` markers as comments** (follow-up to #264; `engine/scout/action_items/render.py`, `engine/scout/action_items/plan_marks.py`). The `- estimate:`, `- block:` and `- actual:` lines under a planned task stopped rendering as comments from `estimate`, `block` and `actual`. Only a line `plan_marks` reads as a marker is left out (inside the task's sub-list, the first line per key whose value parses), so a hand-written `- block: waiting on Priya` is still a comment. Scout.app reads the same lines into a plan chip on the task card. `delete-comment` and `edit-comment --index` still count the markers, so a Scout.app from before or after the chip edits the comment you picked. The parser corpus gains four marker cases with `expected.plan`.
 
 ## [0.18.6] - 2026-10-31

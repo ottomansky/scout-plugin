@@ -61,7 +61,7 @@ A reversed block (`11:00-10:00`) passes 2: the engine has always accepted it, an
 
 ## iOS
 
-scout-iOS-app parses the same sub-bullets and shows the markers as comments. It only adds comments, never deletes or edits one by index, so there is no wrong-line risk there, only noise. Its corpus copy and the same parser carve-out go in a separate scout-iOS-app PR.
+scout-iOS-app parses the same sub-bullets and shows the markers as comments. With the add-back design it needs no parser change for safety: `--index` kept its meaning, and the app only adds comments, never edits or deletes one by index, so nothing it does can hit the wrong line. Its copy of the corpus has to follow this change (the corpus rule wants it to land alongside), in a scout-iOS-app PR that may also carry the same carve-out. If iOS ever edits or deletes comments by index, it needs the same `engineCommentIndex` mapping.
 
 ## Testing
 
