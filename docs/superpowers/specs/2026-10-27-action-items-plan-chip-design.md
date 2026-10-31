@@ -43,7 +43,7 @@ A reversed block (`11:00-10:00`) passes 2: the engine has always accepted it, an
 
 - **Model.** `TaskPlan` on `ActionTask.plan`: estimate, raw estimate, kind, block (`PlannedBlock`), actual and its date. Default `.none`, so existing call sites compile unchanged. `replacingPlan(_:)` sits next to `replacingDetails` and `replacingFields`, and every place that rebuilds a task carries the plan.
 - **Parser.** A marker branch runs ahead of the dash comment branch, with the grammar and the three rules above. The parser tracks the sub-list window itself (a blank or unindented line closes it, a task line opens a new one), because the app otherwise binds comments to the last task across blank lines.
-- **Card.** The trailing status slot shows a clock chip when an open, unsnoozed task has a plan: `10:00-10:45 · 45m`, the weekday first when the block is not today, `· took 1h` once the actual is known, and `45m` alone for an estimate without a block. A done task reads `Done · 1h`. The tooltip spells out date, estimate, raw estimate, kind and actual.
+- **Card.** The trailing status slot (`TaskCardView.trailingStatus`) shows a clock chip when an open, unsnoozed task has a plan and the profile's `fields.plan` is on: `10:00-10:45 · 45m`, the weekday first when the block is not today, `· took 1h` once the actual is known, and `45m` alone for an estimate without a block. A done task reads `Done · 1h`. The tooltip spells out date, estimate, raw estimate, kind and actual.
 - **Comment index.** The parser records, for each marker, how many comments came before it. For the comment it shows at `n`, the card sends `--index n + (markers above it)` (`TaskPlan.engineCommentIndex`), the index every engine version understands, because every engine counts the markers. No probe, no feature flag. The mapping does not depend on the marker rule either: the lister counts every marker-shaped line, so the app only adds back the lines it took out. `set-estimate` puts the markers right under the task line, so on a planned task almost every comment is shifted.
 
 ### Parser contract
@@ -57,7 +57,7 @@ A reversed block (`11:00-10:00`) passes 2: the engine has always accepted it, an
 | Comment index | `--index` keeps its meaning and the new app maps to it. Changing what `--index` counts would make an older app edit the wrong comment against a newer engine (each engine updates through `/scout-update`, apart from the app's own updates); a new selector plus a manifest probe would add a failure mode, a probe that can't answer. |
 | A marker after a blank line | A comment, in both. The engine's scan has always stopped there. |
 | Engine renderer | Skips markers, renders no chip. The dashboard is not where planning happens. |
-| Board cards and the display profile | Unchanged here. `actionItems.fields.plan` from the display-profile spec arrives as a follow-up once the profile code is on `main`. |
+| Board cards and the display profile | Board cards are unchanged. The display profile gets `actionItems.fields.plan` (on by default, a Planned time switch in Settings), which hides the chip and the actual time on done tasks. A snoozed task never shows the chip, also when the profile hides its snooze date. |
 
 ## iOS
 

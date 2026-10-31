@@ -225,4 +225,48 @@ struct PlanMarksTests {
         #expect(TaskCardView.planChipHelp(plan)
                 == "Planned 2026-09-30 10:00-10:45, estimate 45m (raw 30m), deep, took 1h on 2026-09-30")
     }
+
+    // MARK: - Trailing status and the display profile
+
+    private func plannedTask(done: Bool = false, snoozed: Bool = false) -> ActionTask {
+        var plan = TaskPlan()
+        plan.estimateMinutes = 45
+        plan.block = PlannedBlock(date: "2026-09-30", start: "10:00", end: "10:45", eventID: nil)
+        plan.actualMinutes = 60
+        return ActionTask(
+            id: UUID(), lineNumber: 4, done: done, subject: "Draft", plainSubject: "Draft", body: "",
+            comments: [], deepLinks: [], details: [],
+            snoozedUntil: snoozed ? Date(timeIntervalSince1970: 1_800_000_000) : nil,
+            carriedInFrom: nil, plan: plan
+        )
+    }
+
+    private var day: Date {
+        get throws {
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.dateFormat = "yyyy-MM-dd"
+            return try #require(f.date(from: "2026-09-30"))
+        }
+    }
+
+    @Test func anOpenPlannedTaskShowsTheChipUnlessTheProfileHidesIt() throws {
+        let task = plannedTask()
+        #expect(TaskCardView.trailingStatus(task, fields: .init(), today: try day) == .plan("10:00-10:45 · 45m · took 1h"))
+        #expect(TaskCardView.trailingStatus(task, fields: .init(plan: false), today: try day) == TaskCardView.TrailingStatus.none)
+    }
+
+    @Test func aDoneTaskShowsTheActualTimeOnlyWithPlannedTimeOn() throws {
+        let task = plannedTask(done: true)
+        #expect(TaskCardView.trailingStatus(task, fields: .init(), today: try day) == .done("Done · 1h"))
+        #expect(TaskCardView.trailingStatus(task, fields: .init(plan: false), today: try day) == .done("Done"))
+    }
+
+    @Test func aSnoozedTaskNeverShowsThePlanChip() throws {
+        let task = plannedTask(snoozed: true)
+        let until = try #require(task.snoozedUntil)
+        #expect(TaskCardView.trailingStatus(task, fields: .init(), today: try day) == .snoozed(until))
+        // The profile hides the snooze date: the slot stays empty, no plan chip.
+        #expect(TaskCardView.trailingStatus(task, fields: .init(snooze: false), today: try day) == TaskCardView.TrailingStatus.none)
+    }
 }
